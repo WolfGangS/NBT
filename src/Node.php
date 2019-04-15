@@ -6,10 +6,32 @@ namespace Nbt;
  * We're going to rejig the node to accept the values we need to associate
  * with a node.
  */
-class Node implements \Tree\Node\NodeInterface
+class Node implements \Tree\Node\NodeInterface , \JsonSerializable
 {
     use \Tree\Node\NodeTrait {
         __construct as private __traitConstruct;
+    }
+
+    public function __toArray(){
+        if(empty($this->getChildren())){
+            $value = $this->getValue();
+        } else {
+            $value = [];
+            $i = -1;
+            foreach ($this->getChildren() as $childNode) {
+                $name = $childNode->getName();
+                if(empty($name)){
+                    $name = ++$i;
+                }
+                $value[$name] = $childNode;
+            }
+        }
+        return $value;
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->__toArray();
     }
 
     /**
